@@ -60,10 +60,10 @@ FootStepGenerator::FootStepGenerator()
   start_end_time_sec_ = 1.6;
   dsp_ratio_ = 0.2;
 
-  foot_z_swap_m_ = 0.04;
+  foot_z_swap_m_ = 0.05;
   body_z_swap_m_ = 0.005;
 
-  default_y_feet_offset_m_ = 0.074;
+  default_y_feet_offset_m_ = 0.085;
 
   previous_step_type_ = STOP_WALKING;
 

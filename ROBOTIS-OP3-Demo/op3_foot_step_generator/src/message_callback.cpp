@@ -60,9 +60,9 @@ void initialize(void)
 {
   ros::NodeHandle nh;
 
-  g_get_ref_step_data_client      = nh.serviceClient<op3_online_walking_module_msgs::GetReferenceStepData>("/robotis/op3/walking/get_reference_step_data");
-  g_add_step_data_array_client    = nh.serviceClient<op3_online_walking_module_msgs::AddStepDataArray>("/robotis/op3/walking/add_step_data");
-  g_is_running_client             = nh.serviceClient<op3_online_walking_module_msgs::IsRunning>("/robotis/op3/walking/is_running");
+  g_get_ref_step_data_client      = nh.serviceClient<op3_online_walking_module_msgs::GetReferenceStepData>("/robotis/walking/get_reference_step_data");
+  g_add_step_data_array_client    = nh.serviceClient<op3_online_walking_module_msgs::AddStepDataArray>("/robotis/walking/add_step_data");
+  g_is_running_client             = nh.serviceClient<op3_online_walking_module_msgs::IsRunning>("/robotis/walking/is_running");
 
   g_walking_module_status_msg_sub = nh.subscribe("/robotis/status", 10, walkingModuleStatusMSGCallback);
 

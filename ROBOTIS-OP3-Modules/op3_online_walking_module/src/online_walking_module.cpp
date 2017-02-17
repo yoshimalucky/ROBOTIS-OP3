@@ -169,38 +169,38 @@ void OnlineWalkingModule::initialize(const int control_cycle_msec, robotis_frame
   OP3OnlineWalking *online_walking = OP3OnlineWalking::getInstance();
   online_walking->setPreviewTime(1.6);
   online_walking->setPreviewRefHeight(0.2);
-  online_walking->setInitialPose(0, -0.0425, -0.2, 0, 0, 0,
-                                 0,  0.0425, -0.2, 0, 0, 0,
+  online_walking->setInitialPose(0, -0.0425, -0.2305, 0, 0, 0,
+                                 0,  0.0425, -0.2305, 0, 0, 0,
                                  0,      0,     0, 0, 0, 0);
-
+//  online_walking->setInitialPose(0, -0.0525, -0.2305, 0, 0, 0,
+//                                 0,  0.0525, -0.2305, 0, 0, 0,
+//                                 0,       0,     0, 0, 0, 0);
 
   online_walking->hip_roll_feedforward_angle_rad_ = 0.0*M_PI/180.0;
-  online_walking->balance_ctrl_.setCOBManualAdjustment(-20.0*0.001, 0, 0);
+  online_walking->balance_ctrl_.setCOBManualAdjustment(20.0*0.001, 0, 0);
 
   online_walking->initialize(control_cycle_msec);
-
   process_mutex_.lock();
+  online_walking->start();
+  online_walking->process();
   desired_matrix_g_to_cob_   = online_walking->mat_g_to_cob_;
   desired_matrix_g_to_rfoot_ = online_walking->mat_g_to_rfoot_;
   desired_matrix_g_to_lfoot_ = online_walking->mat_g_to_lfoot_;
   process_mutex_.unlock();
 
-  result_["r_leg_hip_y"]->goal_position_ = online_walking->out_angle_rad_[0];
-  result_["r_leg_hip_r"]->goal_position_ = online_walking->out_angle_rad_[1];
-  result_["r_leg_hip_p"]->goal_position_ = online_walking->out_angle_rad_[2];
-  result_["r_leg_kn_p"]->goal_position_  = online_walking->out_angle_rad_[3];
-  result_["r_leg_an_p"]->goal_position_  = online_walking->out_angle_rad_[4];
-  result_["r_leg_an_r"]->goal_position_  = online_walking->out_angle_rad_[5];
+  result_["r_hip_yaw"  ]->goal_position_ = online_walking->out_angle_rad_[0];
+  result_["r_hip_roll" ]->goal_position_ = online_walking->out_angle_rad_[1];
+  result_["r_hip_pitch"]->goal_position_ = online_walking->out_angle_rad_[2];
+  result_["r_knee"     ]->goal_position_  = online_walking->out_angle_rad_[3];
+  result_["r_ank_pitch"]->goal_position_  = online_walking->out_angle_rad_[4];
+  result_["r_ank_roll" ]->goal_position_  = online_walking->out_angle_rad_[5];
 
-  result_["l_leg_hip_y"]->goal_position_ = online_walking->out_angle_rad_[6];
-  result_["l_leg_hip_r"]->goal_position_ = online_walking->out_angle_rad_[7];
-  result_["l_leg_hip_p"]->goal_position_ = online_walking->out_angle_rad_[8];
-  result_["l_leg_kn_p" ]->goal_position_ = online_walking->out_angle_rad_[9];
-  result_["l_leg_an_p" ]->goal_position_ = online_walking->out_angle_rad_[10];
-  result_["l_leg_an_r" ]->goal_position_ = online_walking->out_angle_rad_[11];
-
-  online_walking->start();
-  online_walking->process();
+  result_["l_hip_yaw"  ]->goal_position_ = online_walking->out_angle_rad_[6];
+  result_["l_hip_roll" ]->goal_position_ = online_walking->out_angle_rad_[7];
+  result_["l_hip_pitch"]->goal_position_ = online_walking->out_angle_rad_[8];
+  result_["l_knee"     ]->goal_position_ = online_walking->out_angle_rad_[9];
+  result_["l_ank_pitch"]->goal_position_ = online_walking->out_angle_rad_[10];
+  result_["l_ank_roll" ]->goal_position_ = online_walking->out_angle_rad_[11];
 
   previous_running_ = isRunning();
 
@@ -262,11 +262,6 @@ void OnlineWalkingModule::queueThread()
   while(ros_node.ok())
     callback_queue.callAvailable(duration);
 
-//  while (ros_node.ok())
-//  {
-//    callback_queue.callAvailable();
-//    usleep(1000);
-//  }
 }
 
 void OnlineWalkingModule::publishRobotPose(void)
@@ -1018,6 +1013,7 @@ void OnlineWalkingModule::updateJointFeedBackGain()
 
 bool OnlineWalkingModule::checkBalanceOnOff()
 {
+  return true;
   if(gazebo_)
     return true;
 
@@ -1201,11 +1197,6 @@ void OnlineWalkingModule::process(std::map<std::string, robotis_framework::Dynam
 //  l_foot_Ty_Nm_ = robotis_framework::sign(l_foot_Ty_Nm_) *fmin(fabs(l_foot_Ty_Nm_), 300.0);
 //  l_foot_Tz_Nm_ = robotis_framework::sign(l_foot_Tz_Nm_) *fmin(fabs(l_foot_Tz_Nm_), 300.0);
 
-  double rl_gyro_err = sensors["gyro_x"];
-  double fb_gyro_err = sensors["gyro_y"];
-
-
-
 
   if(balance_update_with_loop_ == true)
   {
@@ -1256,19 +1247,24 @@ void OnlineWalkingModule::process(std::map<std::string, robotis_framework::Dynam
 //  online_walking->current_left_ty_Nm_ = l_foot_Ty_Nm_;
 //  online_walking->current_left_tz_Nm_ = l_foot_Tz_Nm_;
 
-  online_walking->curr_angle_rad_[0]  = result_["r_leg_hip_y"]->goal_position_;
-  online_walking->curr_angle_rad_[1]  = result_["r_leg_hip_r"]->goal_position_;
-  online_walking->curr_angle_rad_[2]  = result_["r_leg_hip_p"]->goal_position_;
-  online_walking->curr_angle_rad_[3]  = result_["r_leg_kn_p" ]->goal_position_;
-  online_walking->curr_angle_rad_[4]  = result_["r_leg_an_p" ]->goal_position_;
-  online_walking->curr_angle_rad_[5]  = result_["r_leg_an_r" ]->goal_position_;
+  double rl_gyro_err = sensors["gyro_x"];
+  double fb_gyro_err = sensors["gyro_y"];
+  online_walking->current_gyro_roll_rad_per_sec_ = rl_gyro_err;
+  online_walking->current_gyro_pitch_rad_per_sec_ = fb_gyro_err;
 
-  online_walking->curr_angle_rad_[6]  = result_["l_leg_hip_y"]->goal_position_;
-  online_walking->curr_angle_rad_[7]  = result_["l_leg_hip_r"]->goal_position_;
-  online_walking->curr_angle_rad_[8]  = result_["l_leg_hip_p"]->goal_position_;
-  online_walking->curr_angle_rad_[9]  = result_["l_leg_kn_p" ]->goal_position_;
-  online_walking->curr_angle_rad_[10] = result_["l_leg_an_p" ]->goal_position_;
-  online_walking->curr_angle_rad_[11] = result_["l_leg_an_r" ]->goal_position_;
+  online_walking->curr_angle_rad_[0]  = result_["r_hip_yaw"  ]->goal_position_;
+  online_walking->curr_angle_rad_[1]  = result_["r_hip_roll" ]->goal_position_;
+  online_walking->curr_angle_rad_[2]  = result_["r_hip_pitch"]->goal_position_;
+  online_walking->curr_angle_rad_[3]  = result_["r_knee"     ]->goal_position_;
+  online_walking->curr_angle_rad_[4]  = result_["r_ank_pitch"]->goal_position_;
+  online_walking->curr_angle_rad_[5]  = result_["r_ank_roll" ]->goal_position_;
+
+  online_walking->curr_angle_rad_[6]  = result_["l_hip_yaw"  ]->goal_position_;
+  online_walking->curr_angle_rad_[7]  = result_["l_hip_roll" ]->goal_position_;
+  online_walking->curr_angle_rad_[8]  = result_["l_hip_pitch"]->goal_position_;
+  online_walking->curr_angle_rad_[9]  = result_["l_knee"     ]->goal_position_;
+  online_walking->curr_angle_rad_[10] = result_["l_ank_pitch"]->goal_position_;
+  online_walking->curr_angle_rad_[11] = result_["l_ank_roll" ]->goal_position_;
 
   for(std::map<std::string, robotis_framework::DynamixelState*>::iterator result_it = result_.begin();
       result_it != result_.end();
@@ -1281,7 +1277,6 @@ void OnlineWalkingModule::process(std::map<std::string, robotis_framework::Dynam
 
   process_mutex_.lock();
   online_walking->process();
-
   desired_matrix_g_to_cob_   = online_walking->mat_g_to_cob_;
   desired_matrix_g_to_rfoot_ = online_walking->mat_g_to_rfoot_;
   desired_matrix_g_to_lfoot_ = online_walking->mat_g_to_lfoot_;

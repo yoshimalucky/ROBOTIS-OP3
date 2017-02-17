@@ -41,7 +41,7 @@
 #include "op3_base_module/base_module.h"
 #include "op3_head_control_module/head_control_module.h"
 #include "op3_action_module/action_module.h"
-#include "op3_walking_module/op3_walking_module.h"
+//#include "op3_walking_module/op3_walking_module.h"
 #include "op3_online_walking_module/online_walking_module.h"
 
 using namespace robotis_framework;
