@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   robotis_controller
   robotis_controller_msgs
   robotis_math
+  #scilab_optimization
     
   cm_740_module
   open_cr_module
@@ -19,6 +20,8 @@ find_package(catkin REQUIRED COMPONENTS
   op3_head_control_module
   op3_action_module
   op3_walking_module
+  op3_online_walking_module
+  op3_balance_control
   op3_kinematics_dynamics
 )
 
@@ -30,7 +33,7 @@ find_package(Eigen REQUIRED)
 ###################################
 ## The catkin_package macro generates cmake config files for your package
 catkin_package(
-  LIBRARIES op3_manager
+  #LIBRARIES op3_manager
 )
 
 ###########
