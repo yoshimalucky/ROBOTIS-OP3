@@ -28,6 +28,9 @@ find_package(catkin REQUIRED COMPONENTS
   op3_action_module
   op3_walking_module
   op3_kinematics_dynamics
+
+  op3_action_module_msgs
+  op3_walking_module_msgs
 )
 
 find_package(Eigen REQUIRED)
